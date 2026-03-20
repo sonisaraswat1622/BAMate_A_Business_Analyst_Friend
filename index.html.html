@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BAMate — Your Reliable BA Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f9f8f6;
+  --surface: #ffffff;
+  --card: #fefefe;
+  --border: #e8e4dd;
+  --border2: #d4cec5;
+  --ink: #1a1814;
+  --muted: #8a8278;
+  --muted2: #b5b0a8;
+  --accent: #1a6b4a;
+  --accent2: #2d5a8e;
+  --accent3: #8b3a62;
+  --gold: #c17f24;
+  --danger: #c0392b;
+  --success: #1a6b4a;
+  --warning: #c17f24;
+  --shadow: 0 1px 3px rgba(26,24,20,0.06), 0 4px 16px rgba(26,24,20,0.04);
+  --shadow-lg: 0 8px 32px rgba(26,24,20,0.12);
+  --r: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+  transition: transform 0.3s;
+}
+
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.brand-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), #2a9d6e);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1rem;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.brand-sub {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-top: 4px;
+}
+
+.sidebar-section {
+  padding: 12px 12px 4px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  margin: 1px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+.nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+.nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.5;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  margin-left: 240px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow);
+}
+
+.topbar-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.topbar-date {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ===== PAGE CONTENT ===== */
+.page { display: none; padding: 28px; flex-direction: column; gap: 20px; }
+.page.active { display: flex; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== DASHBOARD ===== */
+.dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 1100px) { .dash-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.dash-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dash-tile:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+.dash-tile-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.dash-tile-name { font-weight: 700; font-size: 0.88rem; color: var(--ink); margin-bottom: 3px; }
+.dash-tile-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
+
+.dash-tile-count {
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+/* Quick actions */
+.quick-actions {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.recent-list { display: flex; flex-direction: column; gap: 8px; }
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.recent-item:hover { border-color: var(--border2); }
+.recent-icon { font-size: 1rem; flex-shrink: 0; }
+.recent-text { flex: 1; font-weight: 600; color: var(--ink); }
+.recent-meta { font-size: 0.65rem; color: var(--muted); }
+
+/* ===== COMMON COMPONENTS ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(26,24,20,0.02);
+}
+
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.card-body { padding: 18px; }
+
+/* Two column layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 900px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+/* Form elements */
+label.field-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+input[type=text], input[type=date], input[type=number], textarea, select {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+
+textarea { resize: vertical; line-height: 1.6; }
+select option { background: #fff; }
+
+.field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 9px 18px; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; border: none;
+}
+
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #155c3e; transform: translateY(-1px); }
+.btn-secondary { background: var(--accent2); color: white; }
+.btn-secondary:hover { background: #234d7a; transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--ink); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-gold { background: var(--gold); color: white; }
+.btn-sm { padding: 6px 12px; font-size: 0.72rem; }
+.btn-lg { padding: 12px 24px; font-size: 0.88rem; }
+
+/* Tags / badges */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em;
+}
+
+.badge-green { background: rgba(26,107,74,0.1); color: var(--accent); border: 1px solid rgba(26,107,74,0.2); }
+.badge-blue { background: rgba(45,90,142,0.1); color: var(--accent2); border: 1px solid rgba(45,90,142,0.2); }
+.badge-red { background: rgba(192,57,43,0.1); color: var(--danger); border: 1px solid rgba(192,57,43,0.2); }
+.badge-gold { background: rgba(193,127,36,0.1); color: var(--gold); border: 1px solid rgba(193,127,36,0.2); }
+.badge-purple { background: rgba(139,58,98,0.1); color: var(--accent3); border: 1px solid rgba(139,58,98,0.2); }
+
+/* Priority dot */
+.prio-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.prio-high { background: var(--danger); }
+.prio-med { background: var(--gold); }
+.prio-low { background: var(--accent); }
+
+/* Output boxes */
+.output-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: var(--ink);
+  white-space: pre-wrap;
+  font-family: 'DM Mono', monospace;
+  min-height: 120px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.output-box::-webkit-scrollbar { width: 4px; }
+.output-box::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Copy btn */
+.copy-btn {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; font-size: 0.68rem; font-weight: 600; cursor: pointer;
+  color: var(--muted); font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ===== UPLOAD FEATURES ===== */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(26,107,74,0.04);
+}
+.upload-zone.uploaded {
+  border-style: solid;
+  border-color: var(--accent);
+  background: rgba(26,107,74,0.06);
+}
+.uz-icon { font-size: 1.5rem; flex-shrink: 0; }
+.uz-title { font-size: 0.8rem; font-weight: 600; color: var(--ink); text-align:left; }
+.uz-sub { font-size: 0.67rem; color: var(--muted); margin-top: 2px; text-align:left; }
+
+.backup-section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.csv-template-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+.csv-template-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.data-table th {
+  background: rgba(26,24,20,0.04); padding: 9px 12px; text-align: left;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  color: var(--ink); vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(26,24,20,0.02); }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--ink); color: white;
+  padding: 11px 18px; border-radius: 10px;
+  font-size: 0.78rem; font-weight: 600;
+  box-shadow: var(--shadow-lg); z-index: 9999;
+  display: none; animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.toast.show { display: block; }
+
+/* KPI Cards */
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.kpi-green::before { background: var(--accent); }
+.kpi-blue::before { background: var(--accent2); }
+.kpi-gold::before { background: var(--gold); }
+.kpi-red::before { background: var(--danger); }
+
+.kpi-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.kpi-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+.kpi-change { font-size: 0.7rem; font-weight: 600; }
+.kpi-change.up { color: var(--accent); }
+.kpi-change.down { color: var(--danger); }
+
+/* Process steps */
+.process-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 8px; cursor: grab;
+  transition: all 0.15s;
+}
+
+.process-step:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+.process-step.dragging { opacity: 0.5; cursor: grabbing; }
+
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 800; flex-shrink: 0;
+}
+
+.step-content { flex: 1; }
+.step-title { font-weight: 700; font-size: 0.82rem; color: var(--ink); margin-bottom: 3px; }
+.step-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+/* RCA Fishbone */
+.rca-section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+
+.rca-category {
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent2);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.rca-causes { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.rca-cause {
+  background: white; border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 0.72rem; color: var(--ink);
+  display: flex; align-items: center; gap: 4px;
+}
+
+.rca-cause button {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 0.7rem; padding: 0 2px;
+  transition: color 0.1s;
+}
+.rca-cause button:hover { color: var(--danger); }
+
+/* Stakeholder matrix */
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  height: 320px;
+}
+
+.matrix-cell {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--bg);
+  position: relative;
+  overflow-y: auto;
+}
+
+.matrix-cell-label {
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 8px;
+  padding: 3px 8px; border-radius: 4px; width: fit-content;
+}
+
+.matrix-tl { border-top: 3px solid var(--gold); }
+.matrix-tl .matrix-cell-label { background: rgba(193,127,36,0.1); color: var(--gold); }
+.matrix-tr { border-top: 3px solid var(--danger); }
+.matrix-tr .matrix-cell-label { background: rgba(192,57,43,0.1); color: var(--danger); }
+.matrix-bl { border-top: 3px solid var(--muted2); }
+.matrix-bl .matrix-cell-label { background: rgba(26,24,20,0.06); color: var(--muted); }
+.matrix-br { border-top: 3px solid var(--accent2); }
+.matrix-br .matrix-cell-label { background: rgba(45,90,142,0.1); color: var(--accent2); }
+
+.stakeholder-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: white; border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 8px; margin: 2px;
+  font-size: 0.68rem; font-weight: 600; cursor: pointer;
+}
+
+/* User story cards */
+.story-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent2);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+
+.story-card.priority-high { border-left-color: var(--danger); }
+.story-card.priority-med { border-left-color: var(--gold); }
+.story-card.priority-low { border-left-color: var(--accent); }
+
+.story-id { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); margin-bottom: 4px; }
+.story-text { font-size: 0.82rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; line-height: 1.4; }
+.story-criteria { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+/* Meeting notes */
+.action-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 6px; transition: all 0.15s;
+}
+
+.action-item.done { opacity: 0.5; }
+.action-item.done .action-text { text-decoration: line-through; }
+
+.action-checkbox {
+  width: 16px; height: 16px; border-radius: 4px;
+  border: 1.5px solid var(--border2); cursor: pointer;
+  flex-shrink: 0; background: white; appearance: none;
+  transition: all 0.15s;
+}
+
+.action-checkbox:checked { background: var(--accent); border-color: var(--accent); }
+.action-text { flex: 1; font-size: 0.78rem; font-weight: 600; }
+.action-owner { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+.action-due { font-size: 0.65rem; font-family: 'DM Mono', monospace; color: var(--muted); }
+
+/* SQL builder */
+.sql-output {
+  background: #1a1814;
+  color: #e8e4dd;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  min-height: 140px;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.sql-keyword { color: #7eb3ff; font-weight: 700; }
+.sql-string { color: #a8d8a8; }
+.sql-comment { color: #888; font-style: italic; }
+.sql-table { color: #ffd585; }
+.sql-function { color: #d4a0ff; }
+
+/* Change log */
+.change-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+}
+
+/* Mobile hamburger */
+.hamburger {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  font-size: 1.3rem; color: var(--ink); padding: 4px;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .hamburger { display: block; }
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Progress bar */
+.progress-wrap { margin-bottom: 8px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+.progress-track { height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+
+/* Tabs */
+.tab-row { display: flex; gap: 2px; background: var(--bg); padding: 4px; border-radius: 9px; width: fit-content; margin-bottom: 16px; }
+.tab-btn { padding: 7px 16px; border-radius: 7px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon">📊</div>
+      <div class="brand-name" style="font-size:1.1rem; letter-spacing:0.02em;">BA<span style="color:#2a9d6e">Mate</span></div>
+    </div>
+    <div class="brand-sub">Your Reliable BA Companion</div>
+  </div>
+
+  <div class="sidebar-section">Workspace</div>
+  <div class="nav-item active" onclick="showPage('dashboard')"><div class="nav-icon">🏠</div>Dashboard</div>
+
+  <div class="sidebar-section">Analysis Tools</div>
+  <div class="nav-item" onclick="showPage('requirements')"><div class="nav-icon">📋</div>Requirements & Stories</div>
+  <div class="nav-item" onclick="showPage('sql')"><div class="nav-icon">🗄️</div>SQL Query Builder</div>
+  <div class="nav-item" onclick="showPage('rca')"><div class="nav-icon">🔍</div>Root Cause Analysis</div>
+  <div class="nav-item" onclick="showPage('kpi')"><div class="nav-icon">📈</div>KPI Dashboard</div>
+
+  <div class="sidebar-section">Documentation</div>
+  <div class="nav-item" onclick="showPage('process')"><div class="nav-icon">🔄</div>Process Mapper</div>
+  <div class="nav-item" onclick="showPage('stakeholder')"><div class="nav-icon">🤝</div>Stakeholder Matrix</div>
+  <div class="nav-item" onclick="showPage('meeting')"><div class="nav-icon">📝</div>Meeting Notes</div>
+  <div class="nav-item" onclick="showPage('scope')"><div class="nav-icon">🎯</div>Scope & Change Log</div>
+  <div class="nav-item" onclick="showPage('templates')"><div class="nav-icon">✉️</div>Comm Templates</div>
+
+  <div class="sidebar-footer">
+    BAMate — Built for Business Analysts<br>
+    100% offline · GitHub ready<br>
+    Data saved locally
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+  </div>
+
+  <!-- ====== DASHBOARD ====== -->
+  <div class="page active" id="page-dashboard">
+    <div class="dash-grid">
+      <div class="dash-tile" onclick="showPage('requirements')">
+        <div class="dash-tile-icon">📋</div>
+        <div class="dash-tile-name">Requirements</div>
+        <div class="dash-tile-desc">User stories & acceptance criteria</div>
+        <div class="dash-tile-count" style="color:var(--accent2)" id="dash-stories">0</div>
+      </div>
+      <div class="dash-tile" onclick="showPage('meeting')">
+        <div class="dash-tile-icon">📝</div>
+        <div class="dash-tile-name">Action Items</div>
+        <div class="dash-tile-desc">Open tasks from meetings</div>
+        <div class="dash-tile-count" style="color:var(--danger)" id="dash-actions">0</div>
+      </div>
+      <div class="dash-tile" onclick="showPage('kpi')">
+        <div class="dash-tile-icon">📈</div>
+        <div class="dash-tile-name">KPIs Tracked</div>
+        <div class="dash-tile-desc">Active metrics & targets</div>
+        <div class="dash-tile-count" style="color:var(--accent)" id="dash-kpis">0</div>
+      </div>
+      <div class="dash-tile" onclick="showPage('scope')">
+        <div class="dash-tile-icon">🎯</div>
+        <div class="dash-tile-name">Change Requests</div>
+        <div class="dash-tile-desc">Scope changes logged</div>
+        <div class="dash-tile-count" style="color:var(--gold)" id="dash-changes">0</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🚀 Quick Tools</div></div>
+        <div class="card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn btn-outline" style="justify-content:flex-start;" onclick="showPage('sql')">🗄️ Build SQL Query</button>
+          <button class="btn btn-outline" style="justify-content:flex-start;" onclick="showPage('rca')">🔍 Start RCA</button>
+          <button class="btn btn-outline" style="justify-content:flex-start;" onclick="showPage('requirements')">📋 Add User Story</button>
+          <button class="btn btn-outline" style="justify-content:flex-start;" onclick="showPage('meeting')">📝 New Meeting</button>
+          <button class="btn btn-outline" style="justify-content:flex-start;" onclick="showPage('templates')">✉️ Get Template</button>
+          <button class="btn btn-outline" style="justify-content:flex-start;" onclick="showPage('process')">🔄 Map Process</button>
+        </div>
+        <div style="border-top:1px solid var(--border); margin-top:12px; padding-top:12px;">
+          <div style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">💾 Backup & Restore</div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="exportAllData()">⬇️ Export All Data</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('import-all-input').click()">⬆️ Import Backup</button>
+            <input type="file" id="import-all-input" accept=".json" style="display:none" onchange="importAllData(this)"/>
+            <button class="btn btn-outline btn-sm" onclick="if(confirm('Clear ALL data? This cannot be undone!')) clearAllData()">🗑️ Clear All</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">📌 BA Best Practices</div></div>
+        <div class="card-body">
+          <div class="recent-list" id="tips-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== REQUIREMENTS ====== -->
+  <div class="page" id="page-requirements">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Create User Story</div>
+          <button class="csv-template-btn" onclick="downloadCSVTemplate('stories')">⬇ CSV Template</button>
+        </div>
+        <div class="card-body">
+          <!-- CSV Upload Zone -->
+          <div class="upload-zone" id="stories-upload-zone" onclick="document.getElementById('stories-csv-input').click()">
+            <div class="uz-icon">📁</div>
+            <div>
+              <div class="uz-title">Upload CSV to bulk import stories</div>
+              <div class="uz-sub">Columns: id, role, want, so, priority, points, criteria</div>
+            </div>
+          </div>
+          <input type="file" id="stories-csv-input" accept=".csv" style="display:none" onchange="importStoriesCSV(this)"/>
+          <div style="text-align:center; font-size:0.65rem; color:var(--muted); margin-bottom:12px; font-weight:600;">— OR ADD MANUALLY —</div>
+          <div class="field-group">
+            <label class="field-label">Story ID</label>
+            <input type="text" id="story-id" placeholder="US-001" style="font-family:'DM Mono',monospace;"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">As a...</label>
+            <input type="text" id="story-role" placeholder="registered user, admin, manager..."/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">I want to...</label>
+            <input type="text" id="story-want" placeholder="view my dashboard, export reports..."/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">So that...</label>
+            <input type="text" id="story-so" placeholder="I can make data-driven decisions..."/>
+          </div>
+          <div class="two-col">
+            <div class="field-group">
+              <label class="field-label">Priority</label>
+              <select id="story-priority">
+                <option value="high">🔴 High</option>
+                <option value="med" selected>🟡 Medium</option>
+                <option value="low">🟢 Low</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Story Points</label>
+              <select id="story-points">
+                <option>1</option><option>2</option><option>3</option>
+                <option>5</option><option>8</option><option>13</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Acceptance Criteria</label>
+            <textarea id="story-criteria" rows="4" placeholder="Given... When... Then...&#10;Given... When... Then..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="addUserStory()">+ Add User Story</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📌 Story Backlog</div>
+          <div style="display:flex; gap:6px;">
+            <button class="copy-btn" onclick="exportStories()">⬇ Export</button>
+            <select id="filter-priority" onchange="renderStories()" style="width:auto; font-size:0.72rem; padding:4px 8px;">
+              <option value="">All Priorities</option>
+              <option value="high">High</option>
+              <option value="med">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body" style="max-height:520px; overflow-y:auto;">
+          <div id="stories-list"><div style="text-align:center; padding:32px; color:var(--muted); font-size:0.8rem;">No stories yet. Create your first user story!</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SQL BUILDER ====== -->
+  <div class="page" id="page-sql">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🗄️ Query Builder</div></div>
+        <div class="card-body">
+          <div class="tab-row">
+            <button class="tab-btn active" onclick="switchSQLTab('select',this)">SELECT</button>
+            <button class="tab-btn" onclick="switchSQLTab('aggregate',this)">AGGREGATE</button>
+            <button class="tab-btn" onclick="switchSQLTab('join',this)">JOIN</button>
+            <button class="tab-btn" onclick="switchSQLTab('subquery',this)">SUBQUERY</button>
+          </div>
+
+          <div class="tab-content active" id="sql-select">
+            <div class="field-group"><label class="field-label">Table Name</label><input type="text" id="sql-table" placeholder="orders, customers, sales_data..." oninput="buildSQL()"/></div>
+            <div class="field-group"><label class="field-label">Columns (comma separated)</label><input type="text" id="sql-cols" placeholder="id, name, amount, date" oninput="buildSQL()"/></div>
+            <div class="field-group">
+  <label class="field-label" style="display:flex; align-items:center; justify-content:space-between;">
+    WHERE Condition
+    <span style="font-size:0.58rem; color:var(--accent); font-weight:600; letter-spacing:0;">✨ Auto-quotes text values</span>
+  </label>
+  <input type="text" id="sql-where" placeholder="status = active AND region = North" oninput="buildSQL()"/>
+  <div style="font-size:0.62rem; color:var(--muted); margin-top:3px;">
+    💡 Just type values naturally — e.g. <code style="background:var(--bg);padding:1px 4px;border-radius:3px;">region = North</code> → auto becomes <code style="background:var(--bg);padding:1px 4px;border-radius:3px;">region = 'North'</code>
+  </div>
+</div>
+            <div class="field-group"><label class="field-label">ORDER BY</label><input type="text" id="sql-order" placeholder="created_date DESC, amount DESC" oninput="buildSQL()"/></div>
+            <div class="field-group"><label class="field-label">LIMIT</label><input type="number" id="sql-limit" placeholder="100" oninput="buildSQL()"/></div>
+          </div>
+
+          <div class="tab-content" id="sql-aggregate">
+            <div class="field-group"><label class="field-label">Table Name</label><input type="text" id="agg-table" placeholder="sales_data" oninput="buildAggSQL()"/></div>
+            <div class="field-group"><label class="field-label">Aggregate Functions</label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:4px;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.75rem; cursor:pointer;"><input type="checkbox" id="agg-count" onchange="buildAggSQL()"> COUNT(*)</label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.75rem; cursor:pointer;"><input type="checkbox" id="agg-sum" onchange="buildAggSQL()"> SUM(amount)</label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.75px; cursor:pointer;"><input type="checkbox" id="agg-avg" onchange="buildAggSQL()"> AVG(amount)</label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.75rem; cursor:pointer;"><input type="checkbox" id="agg-max" onchange="buildAggSQL()"> MAX(amount)</label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.75rem; cursor:pointer;"><input type="checkbox" id="agg-min" onchange="buildAggSQL()"> MIN(amount)</label>
+              </div>
+            </div>
+            <div class="field-group"><label class="field-label">Aggregate Column</label><input type="text" id="agg-col" placeholder="amount, revenue, count" oninput="buildAggSQL()"/></div>
+            <div class="field-group"><label class="field-label">GROUP BY</label><input type="text" id="agg-group" placeholder="region, product_category, month" oninput="buildAggSQL()"/></div>
+            <div class="field-group"><label class="field-label">HAVING</label><input type="text" id="agg-having" placeholder="SUM(amount) > 10000" oninput="buildAggSQL()"/></div>
+          </div>
+
+          <div class="tab-content" id="sql-join">
+            <div class="field-group"><label class="field-label">Main Table (alias: a)</label><input type="text" id="join-t1" placeholder="orders o" oninput="buildJoinSQL()"/></div>
+            <div class="field-group"><label class="field-label">Join Type</label>
+              <select id="join-type" onchange="buildJoinSQL()">
+                <option>INNER JOIN</option><option>LEFT JOIN</option>
+                <option>RIGHT JOIN</option><option>FULL OUTER JOIN</option>
+              </select>
+            </div>
+            <div class="field-group"><label class="field-label">Join Table (alias: b)</label><input type="text" id="join-t2" placeholder="customers c" oninput="buildJoinSQL()"/></div>
+            <div class="field-group"><label class="field-label">ON Condition</label><input type="text" id="join-on" placeholder="o.customer_id = c.id" oninput="buildJoinSQL()"/></div>
+            <div class="field-group"><label class="field-label">SELECT Columns</label><input type="text" id="join-cols" placeholder="o.id, c.name, o.amount" oninput="buildJoinSQL()"/></div>
+            <div class="field-group">
+  <label class="field-label" style="display:flex; align-items:center; justify-content:space-between;">
+    WHERE
+    <span style="font-size:0.58rem; color:var(--accent); font-weight:600;">✨ Auto-quotes text</span>
+  </label>
+  <input type="text" id="join-where" placeholder="o.status = completed" oninput="buildJoinSQL()"/>
+  <div style="font-size:0.62rem; color:var(--muted); margin-top:3px;">💡 Type naturally — quotes added automatically</div>
+</div>
+          </div>
+
+          <div class="tab-content" id="sql-subquery">
+            <div class="field-group"><label class="field-label">Outer Table</label><input type="text" id="sub-outer" placeholder="employees" oninput="buildSubSQL()"/></div>
+            <div class="field-group"><label class="field-label">Outer Columns</label><input type="text" id="sub-outer-cols" placeholder="name, department, salary" oninput="buildSubSQL()"/></div>
+            <div class="field-group"><label class="field-label">Subquery Type</label>
+              <select id="sub-type" onchange="buildSubSQL()">
+                <option value="where">WHERE column IN (subquery)</option>
+                <option value="having">WHERE column > (AVG subquery)</option>
+                <option value="exists">WHERE EXISTS (subquery)</option>
+              </select>
+            </div>
+            <div class="field-group"><label class="field-label">Subquery Table</label><input type="text" id="sub-inner" placeholder="top_performers" oninput="buildSubSQL()"/></div>
+            <div class="field-group"><label class="field-label">Filter Column</label><input type="text" id="sub-col" placeholder="department_id" oninput="buildSubSQL()"/></div>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn btn-primary" onclick="copySQL()">📋 Copy SQL</button>
+            <button class="btn btn-outline" onclick="clearSQL()">✕ Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Generated Query</div>
+          <button class="copy-btn" onclick="copySQL()">Copy</button>
+        </div>
+        <div class="card-body">
+          <div class="sql-output" id="sql-output">-- Your SQL query will appear here as you type
+-- Fill in the fields on the left to generate
+
+SELECT *
+FROM your_table
+WHERE condition
+ORDER BY column DESC
+LIMIT 100;</div>
+          <div class="divider"></div>
+          <div class="card-title" style="margin-bottom:10px;">🎯 Common BA Queries</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <button class="btn btn-outline btn-sm" style="justify-content:flex-start; font-family:'DM Mono',monospace; font-size:0.7rem;" onclick="loadTemplate('monthly')">📅 Monthly Revenue Summary</button>
+            <button class="btn btn-outline btn-sm" style="justify-content:flex-start; font-family:'DM Mono',monospace; font-size:0.7rem;" onclick="loadTemplate('topn')">🏆 Top N Customers by Value</button>
+            <button class="btn btn-outline btn-sm" style="justify-content:flex-start; font-family:'DM Mono',monospace; font-size:0.7rem;" onclick="loadTemplate('yoy')">📈 Year-over-Year Comparison</button>
+            <button class="btn btn-outline btn-sm" style="justify-content:flex-start; font-family:'DM Mono',monospace; font-size:0.7rem;" onclick="loadTemplate('kpi')">📊 KPI Performance Report</button>
+            <button class="btn btn-outline btn-sm" style="justify-content:flex-start; font-family:'DM Mono',monospace; font-size:0.7rem;" onclick="loadTemplate('cohort')">👥 Cohort Retention Analysis</button>
+            <button class="btn btn-outline btn-sm" style="justify-content:flex-start; font-family:'DM Mono',monospace; font-size:0.7rem;" onclick="loadTemplate('funnel')">🔽 Conversion Funnel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== RCA ====== -->
+  <div class="page" id="page-rca">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔍 Root Cause Analysis</div></div>
+        <div class="card-body">
+          <div class="field-group">
+            <label class="field-label">Problem Statement</label>
+            <textarea id="rca-problem" rows="3" placeholder="Describe the problem clearly and specifically..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">RCA Method</label>
+            <select id="rca-method" onchange="renderRCATemplate()">
+              <option value="5why">5 Whys</option>
+              <option value="fishbone">Fishbone (Ishikawa)</option>
+              <option value="bowtie">Bow-Tie Analysis</option>
+            </select>
+          </div>
+          <div id="rca-content"></div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn btn-primary" onclick="generateRCAReport()">📄 Generate Report</button>
+            <button class="btn btn-outline" onclick="clearRCA()">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📄 RCA Report</div>
+          <button class="copy-btn" onclick="copyEl('rca-output')">Copy</button>
+        </div>
+        <div class="card-body">
+          <div class="output-box" id="rca-output" style="min-height:200px;">Your RCA report will appear here after you fill in the analysis...</div>
+          <div class="divider"></div>
+          <div style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px;">BA Tip</div>
+          <div id="rca-tip" style="font-size:0.75rem; color:var(--muted); line-height:1.6; background:var(--bg); border-radius:8px; padding:12px; border:1px solid var(--border);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== KPI DASHBOARD ====== -->
+  <div class="page" id="page-kpi">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 Add KPI Metric</div>
+        <div style="display:flex; gap:6px;">
+          <button class="csv-template-btn" onclick="downloadCSVTemplate('kpis')">⬇ CSV Template</button>
+          <button class="csv-template-btn" onclick="document.getElementById('kpi-csv-input').click()">⬆ Import CSV</button>
+          <input type="file" id="kpi-csv-input" accept=".csv" style="display:none" onchange="importKPICSV(this)"/>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px;">
+          <div class="field-group"><label class="field-label">KPI Name</label><input type="text" id="kpi-name" placeholder="Revenue Growth"/></div>
+          <div class="field-group"><label class="field-label">Current Value</label><input type="text" id="kpi-current" placeholder="$1.2M"/></div>
+          <div class="field-group"><label class="field-label">Target Value</label><input type="text" id="kpi-target" placeholder="$1.5M"/></div>
+          <div class="field-group"><label class="field-label">% Change</label><input type="text" id="kpi-change" placeholder="+12%"/></div>
+          <div class="field-group"><label class="field-label">Trend</label>
+            <select id="kpi-trend">
+              <option value="up">📈 Up</option>
+              <option value="down">📉 Down</option>
+              <option value="flat">➡️ Flat</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:4px;">
+          <div class="field-group"><label class="field-label">Category</label>
+            <select id="kpi-category">
+              <option>Financial</option><option>Operational</option><option>Customer</option>
+              <option>People</option><option>Process</option><option>Strategic</option>
+            </select>
+          </div>
+          <div class="field-group"><label class="field-label">Color Theme</label>
+            <select id="kpi-color">
+              <option value="green">🟢 Green (Good)</option>
+              <option value="blue">🔵 Blue (Info)</option>
+              <option value="gold">🟡 Gold (Watch)</option>
+              <option value="red">🔴 Red (Alert)</option>
+            </select>
+          </div>
+          <div class="field-group"><label class="field-label">Progress %</label><input type="number" id="kpi-progress" placeholder="80" min="0" max="100"/></div>
+        </div>
+        <button class="btn btn-primary" onclick="addKPI()">+ Add KPI</button>
+      </div>
+    </div>
+    <div id="kpi-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;"></div>
+  </div>
+
+  <!-- ====== PROCESS MAPPER ====== -->
+  <div class="page" id="page-process">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔄 Add Process Step</div></div>
+        <div class="card-body">
+          <div class="field-group"><label class="field-label">Process Name</label><input type="text" id="proc-name" placeholder="Customer Onboarding, Invoice Processing..."/></div>
+          <div class="field-group"><label class="field-label">Step Title</label><input type="text" id="proc-step-title" placeholder="e.g. Verify customer identity"/></div>
+          <div class="field-group"><label class="field-label">Step Description</label><textarea id="proc-step-desc" rows="2" placeholder="Detailed description of what happens in this step..."></textarea></div>
+          <div class="two-col">
+            <div class="field-group"><label class="field-label">Owner / Role</label><input type="text" id="proc-owner" placeholder="BA, Dev, QA, Manager..."/></div>
+            <div class="field-group"><label class="field-label">Duration</label><input type="text" id="proc-duration" placeholder="2 hours, 1 day..."/></div>
+          </div>
+          <div class="field-group"><label class="field-label">Step Type</label>
+            <select id="proc-type">
+              <option value="process">⚙️ Process Step</option>
+              <option value="decision">🔷 Decision Point</option>
+              <option value="start">🟢 Start</option>
+              <option value="end">🔴 End</option>
+              <option value="document">📄 Document</option>
+              <option value="delay">⏸️ Delay/Wait</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addProcessStep()">+ Add Step</button>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="exportProcess()">⬇ Export BPMN Text</button>
+            <button class="btn btn-outline btn-sm" onclick="clearProcess()">↺ Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🗺️ Process Flow</div>
+          <div id="proc-name-display" style="font-size:0.75rem; color:var(--muted); font-style:italic;"></div>
+        </div>
+        <div class="card-body" style="max-height:520px; overflow-y:auto;" id="process-flow">
+          <div style="text-align:center; padding:40px; color:var(--muted); font-size:0.8rem;">Add steps to build your process flow</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== STAKEHOLDER MATRIX ====== -->
+  <div class="page" id="page-stakeholder">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🤝 Add Stakeholder</div>
+          <div style="display:flex; gap:6px;">
+            <button class="csv-template-btn" onclick="downloadCSVTemplate('stakeholders')">⬇ CSV Template</button>
+            <button class="csv-template-btn" onclick="document.getElementById('sh-csv-input').click()">⬆ Import CSV</button>
+            <input type="file" id="sh-csv-input" accept=".csv" style="display:none" onchange="importStakeholdersCSV(this)"/>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-group"><label class="field-label">Name</label><input type="text" id="sh-name" placeholder="John Smith, Finance Team..."/></div>
+          <div class="field-group"><label class="field-label">Role / Title</label><input type="text" id="sh-role" placeholder="CFO, Product Manager, End User..."/></div>
+          <div class="two-col">
+            <div class="field-group"><label class="field-label">Influence (1-5)</label>
+              <select id="sh-influence">
+                <option value="1">1 - Very Low</option><option value="2">2 - Low</option>
+                <option value="3">3 - Medium</option><option value="4">4 - High</option>
+                <option value="5">5 - Very High</option>
+              </select>
+            </div>
+            <div class="field-group"><label class="field-label">Interest (1-5)</label>
+              <select id="sh-interest">
+                <option value="1">1 - Very Low</option><option value="2">2 - Low</option>
+                <option value="3">3 - Medium</option><option value="4">4 - High</option>
+                <option value="5">5 - Very High</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group"><label class="field-label">Engagement Strategy</label><textarea id="sh-strategy" rows="2" placeholder="Keep informed, Manage closely, Monitor..."></textarea></div>
+          <button class="btn btn-primary" onclick="addStakeholder()">+ Add Stakeholder</button>
+          <div class="divider"></div>
+          <div style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Matrix Legend</div>
+          <div style="display:flex; flex-direction:column; gap:6px; font-size:0.72rem; color:var(--muted);">
+            <div>🔴 <strong>Manage Closely</strong> — High influence, High interest</div>
+            <div>🟡 <strong>Keep Satisfied</strong> — High influence, Low interest</div>
+            <div>🔵 <strong>Keep Informed</strong> — Low influence, High interest</div>
+            <div>⚪ <strong>Monitor</strong> — Low influence, Low interest</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Power/Interest Matrix</div>
+          <button class="copy-btn" onclick="exportStakeholders()">⬇ Export</button>
+        </div>
+        <div class="card-body">
+          <div class="matrix-grid" id="stakeholder-matrix">
+            <div class="matrix-cell matrix-tl"><div class="matrix-cell-label">Keep Satisfied</div><div id="matrix-hl"></div></div>
+            <div class="matrix-cell matrix-tr"><div class="matrix-cell-label">Manage Closely</div><div id="matrix-hh"></div></div>
+            <div class="matrix-cell matrix-bl"><div class="matrix-cell-label">Monitor</div><div id="matrix-ll"></div></div>
+            <div class="matrix-cell matrix-br"><div class="matrix-cell-label">Keep Informed</div><div id="matrix-lh"></div></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--muted); margin-top:6px; padding:0 4px;">
+            <span>← Low Interest</span>
+            <span>High Interest →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MEETING NOTES ====== -->
+  <div class="page" id="page-meeting">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📝 Meeting Details</div>
+          <div style="display:flex; gap:6px;">
+            <button class="csv-template-btn" onclick="document.getElementById('mtg-txt-input').click()">⬆ Import TXT Notes</button>
+            <input type="file" id="mtg-txt-input" accept=".txt,.md" style="display:none" onchange="importMeetingTXT(this)"/>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="two-col">
+            <div class="field-group"><label class="field-label">Meeting Title</label><input type="text" id="mtg-title" placeholder="Sprint Planning, Stakeholder Review..."/></div>
+            <div class="field-group"><label class="field-label">Date</label><input type="date" id="mtg-date"/></div>
+          </div>
+          <div class="field-group"><label class="field-label">Attendees</label><input type="text" id="mtg-attendees" placeholder="John, Sarah, Mike, Product Team..."/></div>
+          <div class="field-group"><label class="field-label">Objectives / Agenda</label><textarea id="mtg-agenda" rows="2" placeholder="1. Review sprint progress&#10;2. Discuss blockers&#10;3. Plan next steps"></textarea></div>
+          <div class="field-group"><label class="field-label">Key Decisions Made</label><textarea id="mtg-decisions" rows="2" placeholder="Decision 1: Approved scope change for module X..."></textarea></div>
+          <div class="divider"></div>
+          <div style="font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px;">Add Action Item</div>
+          <div style="display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:end;">
+            <div class="field-group" style="margin:0;"><label class="field-label">Action Item</label><input type="text" id="action-text" placeholder="Update requirements doc, Schedule review..." onkeydown="if(event.key==='Enter') addAction()"/></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Owner</label><input type="text" id="action-owner" placeholder="Name" style="width:90px;"/></div>
+            <div class="field-group" style="margin:0;"><label class="field-label">Due</label><input type="date" id="action-due" style="width:130px;"/></div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button class="btn btn-primary btn-sm" onclick="addAction()">+ Add Action</button>
+            <button class="btn btn-outline btn-sm" onclick="saveMeeting()">💾 Save Meeting</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">✅ Action Items</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span id="action-progress" style="font-size:0.7rem; color:var(--muted);">0 / 0 done</span>
+            <button class="copy-btn" onclick="exportMeeting()">⬇ Export</button>
+          </div>
+        </div>
+        <div class="card-body" style="max-height:260px; overflow-y:auto;" id="actions-list">
+          <div style="text-align:center; padding:24px; color:var(--muted); font-size:0.8rem;">No action items yet</div>
+        </div>
+        <div class="card-header" style="border-top:1px solid var(--border); border-bottom:none;">
+          <div class="card-title">📋 Saved Meetings</div>
+        </div>
+        <div class="card-body" style="max-height:200px; overflow-y:auto;" id="meetings-list">
+          <div style="text-align:center; padding:16px; color:var(--muted); font-size:0.75rem;">No saved meetings</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SCOPE & CHANGE ====== -->
+  <div class="page" id="page-scope">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">🎯 Project Scope</div></div>
+        <div class="card-body">
+          <div class="field-group"><label class="field-label">Project Name</label><input type="text" id="scope-project" placeholder="Project Alpha, CRM Upgrade..."/></div>
+          <div class="field-group"><label class="field-label">In Scope</label><textarea id="scope-in" rows="3" placeholder="• Feature A implementation&#10;• Data migration from legacy system&#10;• User training"></textarea></div>
+          <div class="field-group"><label class="field-label">Out of Scope</label><textarea id="scope-out" rows="3" placeholder="• Third-party integrations&#10;• Mobile app development&#10;• Historical data analysis"></textarea></div>
+          <div class="field-group"><label class="field-label">Assumptions</label><textarea id="scope-assumptions" rows="2" placeholder="• Users have basic computer literacy&#10;• Data quality is acceptable"></textarea></div>
+          <div class="field-group"><label class="field-label">Constraints</label><textarea id="scope-constraints" rows="2" placeholder="• Go-live by Q3&#10;• Budget of $200K"></textarea></div>
+          <button class="btn btn-primary" onclick="saveScope()">💾 Save Scope</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📝 Log Change Request</div>
+        </div>
+        <div class="card-body">
+          <div class="field-group"><label class="field-label">Change Title</label><input type="text" id="cr-title" placeholder="Add export to PDF feature..."/></div>
+          <div class="two-col">
+            <div class="field-group"><label class="field-label">Requested By</label><input type="text" id="cr-requester" placeholder="Stakeholder name"/></div>
+            <div class="field-group"><label class="field-label">Impact</label>
+              <select id="cr-impact">
+                <option value="low">🟢 Low</option>
+                <option value="med" selected>🟡 Medium</option>
+                <option value="high">🔴 High</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group"><label class="field-label">Description</label><textarea id="cr-desc" rows="2" placeholder="Describe the requested change and business justification..."></textarea></div>
+          <div class="field-group"><label class="field-label">Effort Estimate</label><input type="text" id="cr-effort" placeholder="3 days, 1 sprint, 8 hours..."/></div>
+          <div class="field-group"><label class="field-label">Status</label>
+            <select id="cr-status">
+              <option value="pending">⏳ Pending Review</option>
+              <option value="approved">✅ Approved</option>
+              <option value="rejected">❌ Rejected</option>
+              <option value="deferred">📅 Deferred</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addChangeRequest()">+ Log Change Request</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 Change Request Log</div>
+        <button class="copy-btn" onclick="exportChanges()">⬇ Export</button>
+      </div>
+      <div class="card-body" style="overflow-x:auto;">
+        <table class="data-table" id="change-table">
+          <thead><tr><th>#</th><th>Title</th><th>Requester</th><th>Impact</th><th>Effort</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="change-tbody"><tr><td colspan="8" style="text-align:center; color:var(--muted); padding:20px;">No change requests logged yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== COMMUNICATION TEMPLATES ====== -->
+  <div class="page" id="page-templates">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">✉️ Template Generator</div></div>
+        <div class="card-body">
+          <div class="field-group"><label class="field-label">Template Type</label>
+            <select id="tmpl-type" onchange="previewTemplate()">
+              <option value="requirements-review">📋 Requirements Review Request</option>
+              <option value="stakeholder-update">📊 Weekly Stakeholder Update</option>
+              <option value="scope-change">🎯 Scope Change Notification</option>
+              <option value="meeting-invite">📅 Meeting Invitation</option>
+              <option value="escalation">🚨 Issue Escalation</option>
+              <option value="signoff">✅ Sign-off Request</option>
+              <option value="gap-analysis">🔍 Gap Analysis Summary</option>
+              <option value="go-live">🚀 Go-Live Readiness</option>
+            </select>
+          </div>
+          <div class="field-group"><label class="field-label">Project Name</label><input type="text" id="tmpl-project" placeholder="CRM Upgrade, Project Alpha..." oninput="previewTemplate()"/></div>
+          <div class="field-group"><label class="field-label">Recipient Name/Team</label><input type="text" id="tmpl-recipient" placeholder="John Smith, Finance Team..." oninput="previewTemplate()"/></div>
+          <div class="field-group"><label class="field-label">Your Name</label><input type="text" id="tmpl-sender" placeholder="Soni Saraswat" oninput="previewTemplate()"/></div>
+          <div class="field-group"><label class="field-label">Key Detail / Date</label><input type="text" id="tmpl-detail" placeholder="Deadline, meeting date, specific item..." oninput="previewTemplate()"/></div>
+          <div class="field-group"><label class="field-label">Custom Note (optional)</label><textarea id="tmpl-note" rows="2" placeholder="Any specific context to add..." oninput="previewTemplate()"></textarea></div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="copyEl('tmpl-output')">📋 Copy Template</button>
+            <button class="btn btn-outline" onclick="previewTemplate()">🔄 Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📄 Generated Template</div>
+          <button class="copy-btn" onclick="copyEl('tmpl-output')">Copy</button>
+        </div>
+        <div class="card-body">
+          <div class="output-box" id="tmpl-output" style="min-height:400px; font-family:'DM Sans',sans-serif; white-space:pre-wrap; font-size:0.8rem; line-height:1.7;">Select a template type and fill in the details to generate your communication...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================================================================
+// BA COMMAND CENTER — Complete Your Reliable BA Companion
+// No API · 100% GitHub Compatible · LocalStorage Persistence
+// ================================================================
+
+// ===== GLOBAL STATE =====
+let state = {
+  stories: JSON.parse(localStorage.getItem('ba_stories') || '[]'),
+  kpis: JSON.parse(localStorage.getItem('ba_kpis') || '[]'),
+  processSteps: JSON.parse(localStorage.getItem('ba_process') || '[]'),
+  stakeholders: JSON.parse(localStorage.getItem('ba_stakeholders') || '[]'),
+  actions: JSON.parse(localStorage.getItem('ba_actions') || '[]'),
+  meetings: JSON.parse(localStorage.getItem('ba_meetings') || '[]'),
+  changes: JSON.parse(localStorage.getItem('ba_changes') || '[]'),
+  scope: JSON.parse(localStorage.getItem('ba_scope') || '{}'),
+};
+
+function save(key, data) { localStorage.setItem('ba_' + key, JSON.stringify(data)); }
+
+// ===== NAVIGATION =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+
+  const titles = {
+    dashboard:'Dashboard', requirements:'Requirements & User Stories',
+    sql:'SQL Query Builder', rca:'Root Cause Analysis',
+    kpi:'KPI Dashboard', process:'Process Mapper',
+    stakeholder:'Stakeholder Matrix', meeting:'Meeting Notes & Actions',
+    scope:'Scope & Change Log', templates:'Communication Templates'
+  };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+  document.title = (titles[name] || name) + ' — BAMate';
+
+  // Activate nav item
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    if (item.getAttribute('onclick')?.includes(name)) item.classList.add('active');
+  });
+
+  // Page init
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'rca') renderRCATemplate();
+  if (name === 'kpi') renderKPIs();
+  if (name === 'process') renderProcess();
+  if (name === 'stakeholder') renderStakeholders();
+  if (name === 'meeting') { renderActions(); renderMeetings(); }
+  if (name === 'scope') renderChanges();
+  if (name === 'templates') previewTemplate();
+
+  closeSidebar();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const openActions = state.actions.filter(a => !a.done).length;
+  document.getElementById('dash-stories').textContent = state.stories.length;
+  document.getElementById('dash-actions').textContent = openActions;
+  document.getElementById('dash-kpis').textContent = state.kpis.length;
+  document.getElementById('dash-changes').textContent = state.changes.length;
+
+  const tips = [
+    { icon:'💡', text:'Always validate requirements with stakeholders before development begins.' },
+    { icon:'📊', text:'Use SMART criteria: Specific, Measurable, Achievable, Relevant, Time-bound.' },
+    { icon:'🎯', text:'Document assumptions explicitly — they often become risks.' },
+    { icon:'🤝', text:'Identify stakeholders early. Late discovery adds cost and delays.' },
+    { icon:'🔍', text:'Ask "why" five times to find the true root cause of any problem.' },
+  ];
+
+  const tipEl = document.getElementById('tips-list');
+  tipEl.innerHTML = tips.map(t => `
+    <div class="recent-item">
+      <div class="recent-icon">${t.icon}</div>
+      <div style="font-size:0.75rem; color:var(--muted); line-height:1.5;">${t.text}</div>
+    </div>
+  `).join('');
+}
+
+// ===== USER STORIES =====
+function addUserStory() {
+  const id = document.getElementById('story-id').value.trim() || `US-${String(state.stories.length+1).padStart(3,'0')}`;
+  const role = document.getElementById('story-role').value.trim();
+  const want = document.getElementById('story-want').value.trim();
+  const so = document.getElementById('story-so').value.trim();
+  if (!role || !want) { showToast('⚠️ Please fill in the role and what they want!'); return; }
+
+  state.stories.push({
+    id, role, want, so,
+    priority: document.getElementById('story-priority').value,
+    points: document.getElementById('story-points').value,
+    criteria: document.getElementById('story-criteria').value,
+    date: new Date().toLocaleDateString()
+  });
+  save('stories', state.stories);
+
+  ['story-id','story-role','story-want','story-so','story-criteria'].forEach(f => document.getElementById(f).value = '');
+  renderStories();
+  showToast('✅ User story added!');
+}
+
+function renderStories() {
+  const filter = document.getElementById('filter-priority').value;
+  const filtered = filter ? state.stories.filter(s => s.priority === filter) : state.stories;
+  const el = document.getElementById('stories-list');
+  if (!filtered.length) { el.innerHTML = '<div style="text-align:center; padding:32px; color:var(--muted); font-size:0.8rem;">No stories found.</div>'; return; }
+  const pColors = { high:'priority-high', med:'priority-med', low:'priority-low' };
+  const pLabels = { high:'🔴 High', med:'🟡 Medium', low:'🟢 Low' };
+  el.innerHTML = filtered.map((s,i) => `
+    <div class="story-card ${pColors[s.priority]}">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <div class="story-id">${s.id}</div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <span class="badge badge-blue">${s.points} pts</span>
+          <button onclick="deleteStory(${i})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.8rem;" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="story-text">As a <strong>${s.role}</strong>, I want to <strong>${s.want}</strong>${s.so ? `, so that ${s.so}` : ''}.</div>
+      ${s.criteria ? `<div class="story-criteria">✅ ${s.criteria.replace(/\n/g,'<br>✅ ')}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function deleteStory(i) { state.stories.splice(i,1); save('stories',state.stories); renderStories(); showToast('🗑️ Story deleted'); }
+
+function exportStories() {
+  let text = '# USER STORY BACKLOG\n\n';
+  state.stories.forEach(s => {
+    text += `## ${s.id} — ${s.priority.toUpperCase()} Priority (${s.points} pts)\n`;
+    text += `As a **${s.role}**, I want to **${s.want}**${s.so ? `, so that **${s.so}**` : ''}.\n\n`;
+    if (s.criteria) text += `**Acceptance Criteria:**\n${s.criteria}\n\n`;
+    text += '---\n\n';
+  });
+  copyText(text);
+  showToast('📋 Stories copied to clipboard!');
+}
+
+// ===== SQL BUILDER =====
+function switchSQLTab(name, el) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sql-' + name).classList.add('active');
+  buildSQL();
+}
+
+function autoQuoteWhere(where) {
+  // Auto-add quotes around text values in WHERE clause
+  // Handles: column = value, column != value, column LIKE value, column IN (...)
+  if (!where) return where;
+
+  // Already has quotes? leave it
+  // Pattern: find = or != or LIKE followed by a word that isn't a number
+  return where.replace(
+    /(=|!=|<>|LIKE|like|IN|in|NOT IN|not in)\s+([^'"\d(\s][^\s,)]*)/g,
+    (match, op, val) => {
+      // Skip if it looks like a column reference (contains .) or is a number
+      if (val.includes('.') || /^\d/.test(val) || val.toUpperCase() === 'NULL') return match;
+      // Skip SQL keywords
+      const keywords = ['TRUE','FALSE','NULL','AND','OR','NOT'];
+      if (keywords.includes(val.toUpperCase())) return match;
+      return `${op} '${val}'`;
+    }
+  );
+}
+
+function buildSQL() {
+  const table = document.getElementById('sql-table').value.trim() || 'your_table';
+  const cols = document.getElementById('sql-cols').value.trim() || '*';
+  const whereRaw = document.getElementById('sql-where').value.trim();
+  const where = autoQuoteWhere(whereRaw);
+  const order = document.getElementById('sql-order').value.trim();
+  const limit = document.getElementById('sql-limit').value.trim();
+
+  let sql = `SELECT ${cols}\nFROM ${table}`;
+  if (where) sql += `\nWHERE ${where}`;
+  if (order) sql += `\nORDER BY ${order}`;
+  if (limit) sql += `\nLIMIT ${limit}`;
+  sql += ';';
+
+  // Show auto-fix notice if quotes were added
+  if (where !== whereRaw) {
+    showToast('✅ Auto-fixed: Quotes added around text values!');
+  }
+
+  renderSQL(sql);
+}
+
+function buildAggSQL() {
+  const table = document.getElementById('agg-table').value.trim() || 'your_table';
+  const col = document.getElementById('agg-col').value.trim() || 'amount';
+  const group = document.getElementById('agg-group').value.trim();
+  const having = document.getElementById('agg-having').value.trim();
+
+  const fns = [];
+  if (document.getElementById('agg-count').checked) fns.push('COUNT(*) AS total_count');
+  if (document.getElementById('agg-sum').checked) fns.push(`SUM(${col}) AS total_${col}`);
+  if (document.getElementById('agg-avg').checked) fns.push(`AVG(${col}) AS avg_${col}`);
+  if (document.getElementById('agg-max').checked) fns.push(`MAX(${col}) AS max_${col}`);
+  if (document.getElementById('agg-min').checked) fns.push(`MIN(${col}) AS min_${col}`);
+
+  const selCols = group ? `${group},\n       ${fns.join(',\n       ') || 'COUNT(*)'}` : (fns.join(',\n       ') || 'COUNT(*)');
+  let sql = `SELECT ${selCols}\nFROM ${table}`;
+  if (group) sql += `\nGROUP BY ${group}`;
+  if (having) sql += `\nHAVING ${autoQuoteWhere(having)}`;
+  sql += '\nORDER BY 2 DESC;';
+  renderSQL(sql);
+}
+
+function buildJoinSQL() {
+  const t1 = document.getElementById('join-t1').value.trim() || 'table_a a';
+  const t2 = document.getElementById('join-t2').value.trim() || 'table_b b';
+  const type = document.getElementById('join-type').value;
+  const on = document.getElementById('join-on').value.trim() || 'a.id = b.a_id';
+  const cols = document.getElementById('join-cols').value.trim() || 'a.*, b.name';
+  const where = document.getElementById('join-where').value.trim();
+
+  let sql = `SELECT ${cols}\nFROM ${t1}\n${type} ${t2}\n  ON ${on}`;
+  if (where) sql += `\nWHERE ${autoQuoteWhere(where)}`;
+  sql += ';';
+  renderSQL(sql);
+}
+
+function buildSubSQL() {
+  const outer = document.getElementById('sub-outer').value.trim() || 'employees';
+  const outerCols = document.getElementById('sub-outer-cols').value.trim() || 'name, department, salary';
+  const subType = document.getElementById('sub-type').value;
+  const inner = document.getElementById('sub-inner').value.trim() || 'top_performers';
+  const col = document.getElementById('sub-col').value.trim() || 'department_id';
+
+  let sql = `SELECT ${outerCols}\nFROM ${outer}\nWHERE `;
+  if (subType === 'where') sql += `${col} IN (\n  SELECT ${col}\n  FROM ${inner}\n);`;
+  else if (subType === 'having') sql += `salary > (\n  SELECT AVG(salary)\n  FROM ${outer}\n);`;
+  else sql += `EXISTS (\n  SELECT 1\n  FROM ${inner}\n  WHERE ${inner}.${col} = ${outer}.${col}\n);`;
+  renderSQL(sql);
+}
+
+function renderSQL(sql) {
+  // Syntax highlight
+  let highlighted = sql
+    .replace(/\b(SELECT|FROM|WHERE|JOIN|ON|GROUP BY|ORDER BY|HAVING|LIMIT|INNER|LEFT|RIGHT|FULL|OUTER|AND|OR|NOT|IN|EXISTS|AS|DISTINCT|COUNT|SUM|AVG|MAX|MIN|UNION|WITH|CASE|WHEN|THEN|ELSE|END|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|INDEX|VIEW)\b/g, '<span class="sql-keyword">$1</span>')
+    .replace(/'[^']*'/g, '<span class="sql-string">$&</span>')
+    .replace(/--[^\n]*/g, '<span class="sql-comment">$&</span>');
+  document.getElementById('sql-output').innerHTML = highlighted;
+}
+
+function loadTemplate(type) {
+  const templates = {
+    monthly: `-- Monthly Revenue Summary\nSELECT\n  DATE_TRUNC('month', order_date) AS month,\n  COUNT(*) AS total_orders,\n  SUM(amount) AS total_revenue,\n  AVG(amount) AS avg_order_value,\n  COUNT(DISTINCT customer_id) AS unique_customers\nFROM orders\nWHERE order_date >= DATEADD(month, -12, GETDATE())\nGROUP BY DATE_TRUNC('month', order_date)\nORDER BY month DESC;`,
+    topn: `-- Top 10 Customers by Revenue\nSELECT TOP 10\n  c.customer_id,\n  c.customer_name,\n  COUNT(o.order_id) AS total_orders,\n  SUM(o.amount) AS lifetime_value,\n  MAX(o.order_date) AS last_order_date\nFROM customers c\nINNER JOIN orders o ON c.customer_id = o.customer_id\nWHERE o.status = 'completed'\nGROUP BY c.customer_id, c.customer_name\nORDER BY lifetime_value DESC;`,
+    yoy: `-- Year-over-Year Comparison\nSELECT\n  YEAR(sale_date) AS year,\n  MONTH(sale_date) AS month,\n  SUM(revenue) AS current_revenue,\n  LAG(SUM(revenue)) OVER (PARTITION BY MONTH(sale_date) ORDER BY YEAR(sale_date)) AS prev_year_revenue,\n  ROUND(((SUM(revenue) - LAG(SUM(revenue)) OVER (PARTITION BY MONTH(sale_date) ORDER BY YEAR(sale_date)))\n    / LAG(SUM(revenue)) OVER (PARTITION BY MONTH(sale_date) ORDER BY YEAR(sale_date))) * 100, 2) AS yoy_growth_pct\nFROM sales\nGROUP BY YEAR(sale_date), MONTH(sale_date)\nORDER BY year, month;`,
+    kpi: `-- KPI Performance Report\nSELECT\n  kpi_name,\n  current_value,\n  target_value,\n  ROUND((current_value / target_value) * 100, 1) AS achievement_pct,\n  CASE\n    WHEN (current_value / target_value) >= 1.0 THEN 'Achieved'\n    WHEN (current_value / target_value) >= 0.8 THEN 'On Track'\n    WHEN (current_value / target_value) >= 0.6 THEN 'At Risk'\n    ELSE 'Off Track'\n  END AS status\nFROM kpi_metrics\nWHERE period = CURRENT_QUARTER\nORDER BY achievement_pct DESC;`,
+    cohort: `-- Cohort Retention Analysis\nWITH cohorts AS (\n  SELECT\n    customer_id,\n    DATE_TRUNC('month', MIN(order_date)) AS cohort_month\n  FROM orders\n  GROUP BY customer_id\n),\ncohort_data AS (\n  SELECT\n    c.cohort_month,\n    DATEDIFF(month, c.cohort_month, DATE_TRUNC('month', o.order_date)) AS month_number,\n    COUNT(DISTINCT o.customer_id) AS customers\n  FROM cohorts c\n  LEFT JOIN orders o ON c.customer_id = o.customer_id\n  GROUP BY c.cohort_month, month_number\n)\nSELECT * FROM cohort_data\nORDER BY cohort_month, month_number;`,
+    funnel: `-- Conversion Funnel Analysis\nSELECT\n  stage,\n  COUNT(*) AS users,\n  LAG(COUNT(*)) OVER (ORDER BY stage_order) AS prev_stage,\n  ROUND(COUNT(*) * 100.0 / FIRST_VALUE(COUNT(*)) OVER (ORDER BY stage_order), 1) AS overall_conversion_pct,\n  ROUND(COUNT(*) * 100.0 / LAG(COUNT(*)) OVER (ORDER BY stage_order), 1) AS step_conversion_pct\nFROM user_funnel\nGROUP BY stage, stage_order\nORDER BY stage_order;`,
+  };
+  renderSQL(templates[type] || '');
+}
+
+function copySQL() { copyText(document.getElementById('sql-output').textContent); showToast('📋 SQL copied!'); }
+function clearSQL() { document.getElementById('sql-output').innerHTML = '-- Clear! Start building your query...'; }
+
+// ===== RCA =====
+function renderRCATemplate() {
+  const method = document.getElementById('rca-method').value;
+  const el = document.getElementById('rca-content');
+
+  if (method === '5why') {
+    el.innerHTML = [1,2,3,4,5].map(i => `
+      <div class="field-group">
+        <label class="field-label">Why ${i}${i===1?' — The Initial Problem':''}</label>
+        <input type="text" id="why-${i}" placeholder="${i===1?'Why did the problem occur?':'Why did that happen?'}"/>
+      </div>
+    `).join('') + `
+      <div class="field-group">
+        <label class="field-label">Root Cause Identified</label>
+        <textarea id="why-root" rows="2" placeholder="The true root cause based on your 5 whys analysis..."></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Corrective Action</label>
+        <textarea id="why-action" rows="2" placeholder="What specific action will address the root cause?"></textarea>
+      </div>`;
+
+    document.getElementById('rca-tip').textContent = '💡 The 5 Whys technique was developed by Toyota. Keep asking "why" until you find a root cause you can actually act on — not just symptoms. Usually 5 iterations is enough, but sometimes fewer or more are needed.';
+  } else if (method === 'fishbone') {
+    const categories = ['People', 'Process', 'Technology', 'Environment', 'Materials', 'Measurement'];
+    el.innerHTML = categories.map(cat => `
+      <div class="rca-section">
+        <div class="rca-category">🔷 ${cat}</div>
+        <div class="rca-causes" id="fish-${cat.toLowerCase()}"></div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <input type="text" id="fish-input-${cat.toLowerCase()}" placeholder="Add cause in ${cat}..." style="font-size:0.75rem; padding:6px 10px;"/>
+          <button class="btn btn-outline btn-sm" onclick="addFishCause('${cat.toLowerCase()}')">+</button>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('rca-tip').textContent = '💡 The Ishikawa (Fishbone) diagram helps identify all possible causes across key categories. In BA work, use this for process failures, data quality issues, and system problems.';
+  } else {
+    el.innerHTML = `
+      <div class="field-group"><label class="field-label">Threat / Hazard</label><input type="text" id="bt-threat" placeholder="What is the threat or hazard?"/></div>
+      <div class="field-group"><label class="field-label">Top Event (the problem)</label><input type="text" id="bt-event" placeholder="What is the critical event?"/></div>
+      <div class="field-group"><label class="field-label">Prevention Controls (Left side)</label><textarea id="bt-prevent" rows="2" placeholder="Controls to PREVENT the event from occurring..."></textarea></div>
+      <div class="field-group"><label class="field-label">Consequences (Right side)</label><textarea id="bt-conseq" rows="2" placeholder="Potential consequences if event occurs..."></textarea></div>
+      <div class="field-group"><label class="field-label">Mitigation Controls (Right side)</label><textarea id="bt-mitigate" rows="2" placeholder="Controls to REDUCE impact of consequences..."></textarea></div>`;
+    document.getElementById('rca-tip').textContent = '💡 Bow-Tie analysis is excellent for risk management. It shows both prevention (left side) and mitigation (right side) in one view — perfect for stakeholder presentations.';
+  }
+}
+
+function addFishCause(cat) {
+  const input = document.getElementById(`fish-input-${cat}`);
+  const val = input.value.trim();
+  if (!val) return;
+  const container = document.getElementById(`fish-${cat}`);
+  const span = document.createElement('div');
+  span.className = 'rca-cause';
+  span.innerHTML = `${val} <button onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(span);
+  input.value = '';
+}
+
+function generateRCAReport() {
+  const problem = document.getElementById('rca-problem').value.trim();
+  const method = document.getElementById('rca-method').value;
+  if (!problem) { showToast('⚠️ Please describe the problem first!'); return; }
+
+  let report = `ROOT CAUSE ANALYSIS REPORT\n${'='.repeat(50)}\n\n`;
+  report += `Problem Statement:\n${problem}\n\n`;
+  report += `Analysis Method: ${method === '5why' ? '5 Whys' : method === 'fishbone' ? 'Fishbone (Ishikawa)' : 'Bow-Tie'}\n`;
+  report += `Date: ${new Date().toLocaleDateString()}\n\n`;
+  report += `${'─'.repeat(50)}\n\n`;
+
+  if (method === '5why') {
+    report += 'WHY ANALYSIS:\n\n';
+    for (let i = 1; i <= 5; i++) {
+      const val = document.getElementById(`why-${i}`)?.value.trim();
+      if (val) report += `Why ${i}: ${val}\n`;
+    }
+    const root = document.getElementById('why-root')?.value.trim();
+    const action = document.getElementById('why-action')?.value.trim();
+    if (root) report += `\nROOT CAUSE:\n${root}\n`;
+    if (action) report += `\nCORRECTIVE ACTION:\n${action}\n`;
+  } else if (method === 'fishbone') {
+    report += 'CAUSE CATEGORIES:\n\n';
+    ['people','process','technology','environment','materials','measurement'].forEach(cat => {
+      const causes = document.getElementById(`fish-${cat}`);
+      if (causes?.children.length) {
+        report += `${cat.toUpperCase()}:\n`;
+        Array.from(causes.children).forEach(c => report += `  • ${c.textContent.replace('✕','').trim()}\n`);
+        report += '\n';
+      }
+    });
+  } else {
+    ['threat','event','prevent','conseq','mitigate'].forEach(f => {
+      const val = document.getElementById(`bt-${f}`)?.value.trim();
+      const labels = { threat:'THREAT/HAZARD', event:'TOP EVENT', prevent:'PREVENTION CONTROLS', conseq:'CONSEQUENCES', mitigate:'MITIGATION CONTROLS' };
+      if (val) report += `${labels[f]}:\n${val}\n\n`;
+    });
+  }
+
+  report += `\n${'─'.repeat(50)}\nGenerated by BA Command Center`;
+  document.getElementById('rca-output').textContent = report;
+  showToast('📄 RCA Report generated!');
+}
+
+function clearRCA() {
+  document.getElementById('rca-problem').value = '';
+  document.getElementById('rca-output').textContent = 'Your RCA report will appear here...';
+  renderRCATemplate();
+}
+
+// ===== KPI DASHBOARD =====
+function addKPI() {
+  const name = document.getElementById('kpi-name').value.trim();
+  if (!name) { showToast('⚠️ Please enter a KPI name!'); return; }
+  state.kpis.push({
+    name,
+    current: document.getElementById('kpi-current').value.trim(),
+    target: document.getElementById('kpi-target').value.trim(),
+    change: document.getElementById('kpi-change').value.trim(),
+    trend: document.getElementById('kpi-trend').value,
+    category: document.getElementById('kpi-category').value,
+    color: document.getElementById('kpi-color').value,
+    progress: parseInt(document.getElementById('kpi-progress').value) || 0,
+  });
+  save('kpis', state.kpis);
+  ['kpi-name','kpi-current','kpi-target','kpi-change','kpi-progress'].forEach(f => document.getElementById(f).value = '');
+  renderKPIs();
+  showToast('📈 KPI added!');
+}
+
+function renderKPIs() {
+  const grid = document.getElementById('kpi-grid');
+  if (!state.kpis.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--muted); font-size:0.8rem; background:white; border-radius:10px; border:1px solid var(--border);">No KPIs tracked yet. Add your first metric above!</div>';
+    return;
+  }
+
+  const colorClass = { green:'kpi-green', blue:'kpi-blue', gold:'kpi-gold', red:'kpi-red' };
+  const trendIcon = { up:'📈', down:'📉', flat:'➡️' };
+  const trendColor = { up:'var(--accent)', down:'var(--danger)', flat:'var(--muted)' };
+
+  grid.innerHTML = state.kpis.map((k,i) => `
+    <div class="kpi-card ${colorClass[k.color] || 'kpi-green'}">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+        <div class="kpi-label">${k.name}</div>
+        <div style="display:flex; gap:4px;">
+          <span class="badge badge-blue" style="font-size:0.55rem;">${k.category}</span>
+          <button onclick="deleteKPI(${i})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.7rem;">✕</button>
+        </div>
+      </div>
+      <div class="kpi-value">${k.current || '—'}</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+        <div class="kpi-change ${k.trend === 'up' ? 'up' : k.trend === 'down' ? 'down' : ''}">${trendIcon[k.trend]} ${k.change || ''}</div>
+        <div style="font-size:0.65rem; color:var(--muted);">Target: ${k.target || '—'}</div>
+      </div>
+      ${k.progress ? `
+        <div class="progress-wrap">
+          <div class="progress-label"><span>${k.progress}% to target</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${k.progress}%; background:${k.color==='red'?'var(--danger)':k.color==='gold'?'var(--gold)':k.color==='blue'?'var(--accent2)':'var(--accent)'}"></div></div>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+function deleteKPI(i) { state.kpis.splice(i,1); save('kpis',state.kpis); renderKPIs(); showToast('🗑️ KPI removed'); }
+
+// ===== PROCESS MAPPER =====
+const typeIcons = { process:'⚙️', decision:'🔷', start:'🟢', end:'🔴', document:'📄', delay:'⏸️' };
+
+function addProcessStep() {
+  const title = document.getElementById('proc-step-title').value.trim();
+  if (!title) { showToast('⚠️ Please enter a step title!'); return; }
+  const name = document.getElementById('proc-name').value.trim();
+  state.processSteps.push({
+    name: name || 'My Process',
+    title, desc: document.getElementById('proc-step-desc').value.trim(),
+    owner: document.getElementById('proc-owner').value.trim(),
+    duration: document.getElementById('proc-duration').value.trim(),
+    type: document.getElementById('proc-type').value,
+    id: Date.now()
+  });
+  save('process', state.processSteps);
+  ['proc-step-title','proc-step-desc','proc-owner','proc-duration'].forEach(f => document.getElementById(f).value = '');
+  renderProcess();
+  showToast('✅ Step added!');
+}
+
+function renderProcess() {
+  const el = document.getElementById('process-flow');
+  if (!state.processSteps.length) {
+    el.innerHTML = '<div style="text-align:center; padding:40px; color:var(--muted); font-size:0.8rem;">Add steps to build your process flow</div>';
+    return;
+  }
+  const name = state.processSteps[state.processSteps.length-1].name;
+  document.getElementById('proc-name-display').textContent = name;
+
+  el.innerHTML = state.processSteps.map((s,i) => `
+    <div class="process-step">
+      <div class="step-num">${i+1}</div>
+      <div style="font-size:1.4rem; flex-shrink:0;">${typeIcons[s.type]}</div>
+      <div class="step-content">
+        <div class="step-title">${s.title}</div>
+        ${s.desc ? `<div class="step-desc">${s.desc}</div>` : ''}
+        <div style="display:flex; gap:8px; margin-top:5px; flex-wrap:wrap;">
+          ${s.owner ? `<span class="badge badge-blue">👤 ${s.owner}</span>` : ''}
+          ${s.duration ? `<span class="badge badge-gold">⏱️ ${s.duration}</span>` : ''}
+          <span class="badge badge-purple">${s.type.toUpperCase()}</span>
+        </div>
+      </div>
+      ${i < state.processSteps.length-1 ? '<div style="position:absolute; left:48px; bottom:-10px; font-size:1.2rem; color:var(--muted2); z-index:1;">↓</div>' : ''}
+      <button onclick="deleteStep(${i})" style="background:none; border:none; cursor:pointer; color:var(--muted); align-self:flex-start;">✕</button>
+    </div>
+    ${i < state.processSteps.length-1 ? '<div style="text-align:left; padding:0 0 0 22px; color:var(--muted2); font-size:1.2rem; line-height:1;">↓</div>' : ''}
+  `).join('');
+}
+
+function deleteStep(i) { state.processSteps.splice(i,1); save('process',state.processSteps); renderProcess(); }
+
+function exportProcess() {
+  let text = `PROCESS FLOW: ${state.processSteps[0]?.name || 'Process'}\n${'='.repeat(50)}\n\n`;
+  state.processSteps.forEach((s,i) => {
+    text += `STEP ${i+1}: ${s.title} [${s.type.toUpperCase()}]\n`;
+    if (s.desc) text += `Description: ${s.desc}\n`;
+    if (s.owner) text += `Owner: ${s.owner}\n`;
+    if (s.duration) text += `Duration: ${s.duration}\n`;
+    text += i < state.processSteps.length-1 ? '  ↓\n\n' : '\n[END]\n';
+  });
+  copyText(text);
+  showToast('📋 Process flow copied!');
+}
+
+function clearProcess() { if (confirm('Clear all process steps?')) { state.processSteps = []; save('process',state.processSteps); renderProcess(); } }
+
+// ===== STAKEHOLDERS =====
+function addStakeholder() {
+  const name = document.getElementById('sh-name').value.trim();
+  if (!name) { showToast('⚠️ Please enter a stakeholder name!'); return; }
+  state.stakeholders.push({
+    name, role: document.getElementById('sh-role').value.trim(),
+    influence: parseInt(document.getElementById('sh-influence').value),
+    interest: parseInt(document.getElementById('sh-interest').value),
+    strategy: document.getElementById('sh-strategy').value.trim(),
+    id: Date.now()
+  });
+  save('stakeholders', state.stakeholders);
+  ['sh-name','sh-role','sh-strategy'].forEach(f => document.getElementById(f).value = '');
+  renderStakeholders();
+  showToast('✅ Stakeholder added!');
+}
+
+function renderStakeholders() {
+  ['hh','hl','lh','ll'].forEach(q => document.getElementById('matrix-'+q).innerHTML = '');
+  state.stakeholders.forEach((s,i) => {
+    const highI = s.influence >= 3, highInt = s.interest >= 3;
+    const quad = highI && highInt ? 'hh' : highI ? 'hl' : highInt ? 'lh' : 'll';
+    const chip = document.createElement('div');
+    chip.className = 'stakeholder-chip';
+    chip.innerHTML = `👤 ${s.name}${s.role ? ` <span style="color:var(--muted);font-size:0.6rem;">(${s.role})</span>` : ''} <button onclick="deleteStakeholder(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.7rem;">✕</button>`;
+    chip.title = s.strategy;
+    document.getElementById('matrix-' + quad).appendChild(chip);
+  });
+}
+
+function deleteStakeholder(i) { state.stakeholders.splice(i,1); save('stakeholders',state.stakeholders); renderStakeholders(); }
+
+function exportStakeholders() {
+  let text = 'STAKEHOLDER REGISTER\n' + '='.repeat(40) + '\n\n';
+  const quadLabels = { hh:'MANAGE CLOSELY', hl:'KEEP SATISFIED', lh:'KEEP INFORMED', ll:'MONITOR' };
+  ['hh','hl','lh','ll'].forEach(q => {
+    const group = state.stakeholders.filter(s => {
+      const hi = s.influence >= 3, hint = s.interest >= 3;
+      return q === (hi&&hint?'hh':hi?'hl':hint?'lh':'ll');
+    });
+    if (group.length) {
+      text += `${quadLabels[q]}:\n`;
+      group.forEach(s => text += `  • ${s.name} (${s.role}) — Influence:${s.influence} Interest:${s.interest}\n    Strategy: ${s.strategy}\n`);
+      text += '\n';
+    }
+  });
+  copyText(text);
+  showToast('📋 Stakeholder register copied!');
+}
+
+// ===== MEETING NOTES =====
+function addAction() {
+  const text = document.getElementById('action-text').value.trim();
+  if (!text) return;
+  state.actions.push({
+    text, done: false,
+    owner: document.getElementById('action-owner').value.trim(),
+    due: document.getElementById('action-due').value,
+    id: Date.now()
+  });
+  save('actions', state.actions);
+  ['action-text','action-owner','action-due'].forEach(f => document.getElementById(f).value = '');
+  renderActions();
+  showToast('✅ Action item added!');
+}
+
+function renderActions() {
+  const el = document.getElementById('actions-list');
+  if (!state.actions.length) { el.innerHTML = '<div style="text-align:center; padding:24px; color:var(--muted); font-size:0.8rem;">No action items yet</div>'; return; }
+
+  const done = state.actions.filter(a => a.done).length;
+  document.getElementById('action-progress').textContent = `${done} / ${state.actions.length} done`;
+
+  el.innerHTML = state.actions.map((a,i) => `
+    <div class="action-item ${a.done ? 'done' : ''}">
+      <input type="checkbox" class="action-checkbox" ${a.done ? 'checked' : ''} onchange="toggleAction(${i})"/>
+      <div class="action-text">${a.text}</div>
+      ${a.owner ? `<div class="action-owner">👤 ${a.owner}</div>` : ''}
+      ${a.due ? `<div class="action-due">📅 ${new Date(a.due).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>` : ''}
+      <button onclick="deleteAction(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;">✕</button>
+    </div>
+  `).join('');
+}
+
+function toggleAction(i) { state.actions[i].done = !state.actions[i].done; save('actions',state.actions); renderActions(); }
+function deleteAction(i) { state.actions.splice(i,1); save('actions',state.actions); renderActions(); }
+
+function saveMeeting() {
+  const title = document.getElementById('mtg-title').value.trim();
+  if (!title) { showToast('⚠️ Please add a meeting title!'); return; }
+  state.meetings.push({
+    title, date: document.getElementById('mtg-date').value,
+    attendees: document.getElementById('mtg-attendees').value.trim(),
+    agenda: document.getElementById('mtg-agenda').value.trim(),
+    decisions: document.getElementById('mtg-decisions').value.trim(),
+    actionCount: state.actions.length, id: Date.now()
+  });
+  save('meetings', state.meetings);
+  ['mtg-title','mtg-attendees','mtg-agenda','mtg-decisions'].forEach(f => document.getElementById(f).value = '');
+  renderMeetings();
+  showToast('💾 Meeting saved!');
+}
+
+function renderMeetings() {
+  const el = document.getElementById('meetings-list');
+  if (!state.meetings.length) { el.innerHTML = '<div style="text-align:center; padding:16px; color:var(--muted); font-size:0.75rem;">No saved meetings</div>'; return; }
+  el.innerHTML = state.meetings.slice(-5).reverse().map((m,i) => `
+    <div class="recent-item">
+      <div class="recent-icon">📝</div>
+      <div><div class="recent-text">${m.title}</div><div class="recent-meta">${m.date || 'No date'} · ${m.attendees || 'No attendees'}</div></div>
+    </div>
+  `).join('');
+}
+
+function exportMeeting() {
+  const title = document.getElementById('mtg-title').value || 'Meeting';
+  let text = `MEETING NOTES: ${title}\n${'='.repeat(50)}\n`;
+  text += `Date: ${document.getElementById('mtg-date').value || 'N/A'}\n`;
+  text += `Attendees: ${document.getElementById('mtg-attendees').value || 'N/A'}\n\n`;
+  const agenda = document.getElementById('mtg-agenda').value;
+  if (agenda) text += `AGENDA:\n${agenda}\n\n`;
+  const decisions = document.getElementById('mtg-decisions').value;
+  if (decisions) text += `KEY DECISIONS:\n${decisions}\n\n`;
+  if (state.actions.length) {
+    text += 'ACTION ITEMS:\n';
+    state.actions.forEach(a => text += `  [${a.done?'✓':' '}] ${a.text}${a.owner?' — '+a.owner:''}${a.due?' (Due: '+a.due+')':''}\n`);
+  }
+  copyText(text);
+  showToast('📋 Meeting notes copied!');
+}
+
+// ===== SCOPE & CHANGE LOG =====
+function saveScope() {
+  state.scope = {
+    project: document.getElementById('scope-project').value,
+    in: document.getElementById('scope-in').value,
+    out: document.getElementById('scope-out').value,
+    assumptions: document.getElementById('scope-assumptions').value,
+    constraints: document.getElementById('scope-constraints').value,
+  };
+  save('scope', state.scope);
+  showToast('💾 Scope saved!');
+}
+
+function addChangeRequest() {
+  const title = document.getElementById('cr-title').value.trim();
+  if (!title) { showToast('⚠️ Please enter a change title!'); return; }
+  state.changes.push({
+    id: `CR-${String(state.changes.length+1).padStart(3,'0')}`,
+    title, requester: document.getElementById('cr-requester').value.trim(),
+    impact: document.getElementById('cr-impact').value,
+    desc: document.getElementById('cr-desc').value.trim(),
+    effort: document.getElementById('cr-effort').value.trim(),
+    status: document.getElementById('cr-status').value,
+    date: new Date().toLocaleDateString()
+  });
+  save('changes', state.changes);
+  ['cr-title','cr-requester','cr-desc','cr-effort'].forEach(f => document.getElementById(f).value = '');
+  renderChanges();
+  showToast('✅ Change request logged!');
+}
+
+function renderChanges() {
+  const tbody = document.getElementById('change-tbody');
+  if (!state.changes.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--muted); padding:20px;">No change requests logged yet</td></tr>';
+    return;
+  }
+  const impactBadge = { low:'badge-green', med:'badge-gold', high:'badge-red' };
+  const statusBadge = { pending:'badge-blue', approved:'badge-green', rejected:'badge-red', deferred:'badge-gold' };
+  const statusLabel = { pending:'⏳ Pending', approved:'✅ Approved', rejected:'❌ Rejected', deferred:'📅 Deferred' };
+  tbody.innerHTML = state.changes.map((c,i) => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace; font-size:0.7rem;">${c.id}</span></td>
+      <td style="max-width:200px;">${c.title}</td>
+      <td>${c.requester || '—'}</td>
+      <td><span class="badge ${impactBadge[c.impact]}">${c.impact.toUpperCase()}</span></td>
+      <td>${c.effort || '—'}</td>
+      <td><span class="badge ${statusBadge[c.status]}">${statusLabel[c.status]}</span></td>
+      <td style="font-size:0.7rem; color:var(--muted);">${c.date}</td>
+      <td><button onclick="deleteChange(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function deleteChange(i) { state.changes.splice(i,1); save('changes',state.changes); renderChanges(); }
+
+function exportChanges() {
+  let text = 'CHANGE REQUEST LOG\n' + '='.repeat(50) + '\n\n';
+  state.changes.forEach(c => {
+    text += `${c.id}: ${c.title}\n`;
+    text += `Requester: ${c.requester} | Impact: ${c.impact.toUpperCase()} | Status: ${c.status.toUpperCase()}\n`;
+    text += `Effort: ${c.effort} | Date: ${c.date}\n`;
+    if (c.desc) text += `Description: ${c.desc}\n`;
+    text += '\n';
+  });
+  copyText(text);
+  showToast('📋 Change log copied!');
+}
+
+// ===== COMMUNICATION TEMPLATES =====
+function previewTemplate() {
+  const type = document.getElementById('tmpl-type').value;
+  const project = document.getElementById('tmpl-project').value || '[Project Name]';
+  const recipient = document.getElementById('tmpl-recipient').value || '[Recipient]';
+  const sender = document.getElementById('tmpl-sender').value || '[Your Name]';
+  const detail = document.getElementById('tmpl-detail').value || '[specific detail]';
+  const note = document.getElementById('tmpl-note').value;
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  const templates = {
+    'requirements-review': `Subject: Requirements Review Request — ${project}
+
+Dear ${recipient},
+
+I hope this message finds you well. As Business Analyst for the ${project} project, I am reaching out to schedule a requirements review session.
+
+I have completed the initial requirements documentation and would like to walk you through the key features and acceptance criteria before development begins. Your input at this stage is critical to ensuring we build the right solution.
+
+WHAT I NEED FROM YOU:
+• Review the attached requirements document (approx. 30 minutes)
+• Identify any gaps or misalignments with business needs
+• Confirm acceptance criteria for each requirement
+• Sign off on the approved requirements baseline
+
+The review session will take approximately ${detail || '1 hour'} and can be conducted via Teams or in-person — whichever you prefer.
+
+${note ? `ADDITIONAL CONTEXT:\n${note}\n\n` : ''}Would you be available this week? I can work around your schedule. Please reply with your availability and I will send a calendar invite.
+
+Thank you for your continued support of this project.
+
+Best regards,
+${sender}
+Business Analyst — ${project}`,
+
+    'stakeholder-update': `Subject: ${project} — Weekly Status Update | ${today}
+
+Dear ${recipient},
+
+Please find below the weekly status update for the ${project} project.
+
+PROJECT STATUS: 🟢 ON TRACK
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCOMPLISHMENTS THIS WEEK
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• ${detail || 'Key milestone completed as planned'}
+• Requirements review completed with all stakeholders
+• Test cases drafted and under review
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+PLANNED FOR NEXT WEEK
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• UAT environment setup and testing
+• Stakeholder demo scheduled
+• Documentation updates
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+RISKS & ISSUES
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• No critical blockers at this time
+• Monitoring: Resource availability in upcoming sprint
+
+${note ? `━━━━━━━━━━━━━━━━━━━━━━━━━\nNOTES\n━━━━━━━━━━━━━━━━━━━━━━━━━\n${note}\n` : ''}
+Please do not hesitate to reach out if you have any questions or concerns.
+
+Best regards,
+${sender}`,
+
+    'scope-change': `Subject: SCOPE CHANGE NOTICE — ${project} | Action Required
+
+Dear ${recipient},
+
+I am writing to formally notify you of a scope change request for the ${project} project that requires your review and approval.
+
+CHANGE REQUEST SUMMARY:
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Change ID: CR-${String(Math.floor(Math.random()*100)+1).padStart(3,'0')}
+Requested By: [Stakeholder Name]
+Date Raised: ${today}
+
+DESCRIPTION OF CHANGE:
+${detail || '[Describe the requested change clearly]'}
+
+IMPACT ASSESSMENT:
+• Timeline Impact: [X days/weeks]
+• Budget Impact: [$X or No financial impact]
+• Resource Impact: [Describe]
+• Risk Level: [Low/Medium/High]
+
+RECOMMENDATION: [Approve / Reject / Defer]
+
+${note ? `ADDITIONAL NOTES:\n${note}\n\n` : ''}ACTION REQUIRED:
+Please review this change request and provide your decision by [DATE].
+
+Your prompt response will help us manage the project schedule effectively.
+
+Best regards,
+${sender}
+Business Analyst`,
+
+    'meeting-invite': `Subject: Meeting Invitation — ${project} | ${detail || '[Meeting Topic]'}
+
+Dear ${recipient},
+
+You are cordially invited to the following meeting:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+MEETING DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Topic:    ${detail || '[Meeting Topic]'}
+Project:  ${project}
+Date:     [DATE]
+Time:     [TIME] — [END TIME]
+Location: [Teams Link / Room Number]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AGENDA:
+1. Welcome & introductions (5 mins)
+2. [Agenda Item 1] (15 mins)
+3. [Agenda Item 2] (15 mins)
+4. Open discussion & Q&A (10 mins)
+5. Next steps & action items (5 mins)
+
+PREPARATION REQUIRED:
+• Please review the attached pre-read document
+• Come prepared with questions or concerns
+
+${note ? `ADDITIONAL INFORMATION:\n${note}\n\n` : ''}Please confirm your attendance by replying to this email. If you are unable to attend, please send a delegate or let me know so I can share the meeting notes afterward.
+
+Looking forward to a productive session.
+
+Best regards,
+${sender}`,
+
+    'escalation': `Subject: ESCALATION — ${project} | Immediate Attention Required
+
+Dear ${recipient},
+
+I am escalating an issue on the ${project} project that requires your immediate attention and guidance.
+
+ISSUE SUMMARY:
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Severity:   HIGH / CRITICAL
+Date Raised: ${today}
+Reported By: ${sender}
+
+ISSUE DESCRIPTION:
+${detail || '[Clearly describe the issue, its impact, and why it requires escalation]'}
+
+BUSINESS IMPACT:
+• [Describe impact on project timeline]
+• [Describe impact on business operations]
+• [Describe impact on stakeholders]
+
+WHAT HAS BEEN DONE:
+• [Action 1 already taken]
+• [Action 2 already taken]
+
+WHAT I NEED FROM YOU:
+• [Specific decision or resource needed]
+• Response required by: [DATE/TIME]
+
+${note ? `ADDITIONAL CONTEXT:\n${note}\n\n` : ''}I understand this is time-sensitive and appreciate your prompt attention to this matter.
+
+Best regards,
+${sender}
+Business Analyst — ${project}`,
+
+    'signoff': `Subject: Sign-Off Request — ${project} | ${detail || 'Requirements / UAT / Deliverable'}
+
+Dear ${recipient},
+
+I am pleased to inform you that the ${detail || 'deliverable'} for the ${project} project is ready for your formal sign-off.
+
+WHAT YOU ARE APPROVING:
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Document/Deliverable: ${detail || '[Deliverable Name]'}
+Version: 1.0
+Date Prepared: ${today}
+Prepared By: ${sender}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This document has gone through the following review stages:
+✅ Internal review by the BA team
+✅ Technical review by development team
+✅ Stakeholder walkthrough completed
+
+HOW TO SIGN OFF:
+Please review the attached document and either:
+a) Reply to this email confirming your approval, or
+b) Sign the physical/digital signature page, or
+c) Approve in [JIRA/Confluence/SharePoint]
+
+Sign-off deadline: [DATE]
+
+${note ? `NOTES:\n${note}\n\n` : ''}If you have any concerns or require changes before sign-off, please contact me immediately so we can address them promptly.
+
+Thank you for your time and continued partnership.
+
+Best regards,
+${sender}`,
+
+    'gap-analysis': `Subject: Gap Analysis Summary — ${project}
+
+Dear ${recipient},
+
+Please find below a summary of the gap analysis conducted for the ${project} project.
+
+GAP ANALYSIS SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Project: ${project}
+Analysis Date: ${today}
+Prepared By: ${sender}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EXECUTIVE SUMMARY:
+The analysis identified ${detail || 'several gaps'} between the current state and the desired future state. Key findings are summarized below.
+
+CURRENT STATE (As-Is):
+• [Describe current process/system/capability]
+• [Key limitations identified]
+• [Pain points documented]
+
+DESIRED FUTURE STATE (To-Be):
+• [Describe target state]
+• [Expected capabilities]
+• [Business outcomes]
+
+KEY GAPS IDENTIFIED:
+1. [Gap 1] — Priority: HIGH
+2. [Gap 2] — Priority: MEDIUM
+3. [Gap 3] — Priority: LOW
+
+RECOMMENDED ACTIONS:
+• Short-term (0-3 months): [Quick wins]
+• Medium-term (3-6 months): [Core improvements]
+• Long-term (6+ months): [Strategic initiatives]
+
+${note ? `ADDITIONAL FINDINGS:\n${note}\n\n` : ''}The full detailed report is attached. I am available to walk through the findings at your convenience.
+
+Best regards,
+${sender}`,
+
+    'go-live': `Subject: Go-Live Readiness Confirmation — ${project} | ${detail || '[Go-Live Date]'}
+
+Dear ${recipient},
+
+I am pleased to confirm that the ${project} project has passed all readiness criteria and is approved for go-live on ${detail || '[GO-LIVE DATE]'}.
+
+GO-LIVE READINESS CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ All critical requirements implemented and verified
+✅ UAT completed with sign-off from business stakeholders
+✅ Data migration tested and validated
+✅ Training completed for all end users
+✅ Support team briefed and on standby
+✅ Rollback plan documented and tested
+✅ Go/No-Go decision: GO ✅
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GO-LIVE SCHEDULE:
+• Deployment Window: [DATE TIME]
+• Estimated Completion: [TIME]
+• Hypercare Period: [X days/weeks]
+• Support Contact: [Contact Details]
+
+WHAT TO EXPECT:
+• [Any expected downtime or impact]
+• [Communication to end users]
+• [Monitoring plan]
+
+${note ? `ADDITIONAL NOTES:\n${note}\n\n` : ''}Please ensure all team members are aware of the go-live schedule. The project team will be on standby during the deployment window.
+
+Thank you all for your hard work bringing this project to completion!
+
+Best regards,
+${sender}
+Business Analyst — ${project}`,
+  };
+
+  document.getElementById('tmpl-output').textContent = templates[type] || 'Select a template type...';
+}
+
+// ===== UTILITIES =====
+function copyEl(id) { copyText(document.getElementById(id).textContent || document.getElementById(id).value); showToast('📋 Copied to clipboard!'); }
+function copyText(text) { navigator.clipboard.writeText(text).catch(() => { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }); }
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===== INIT =====
+document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+
+// Load saved scope
+if (state.scope.project) {
+  ['project','in','out','assumptions','constraints'].forEach(f => {
+    const el = document.getElementById('scope-' + f);
+    if (el) el.value = state.scope[f] || '';
+  });
+}
+
+renderDashboard();
+renderStories();
+
+// ================================================================
+// UPLOAD & IMPORT FEATURES
+// ================================================================
+
+// ---- Drag & drop for stories upload zone ----
+const storiesZone = document.getElementById('stories-upload-zone');
+if (storiesZone) {
+  storiesZone.addEventListener('dragover', e => { e.preventDefault(); storiesZone.classList.add('dragover'); });
+  storiesZone.addEventListener('dragleave', () => storiesZone.classList.remove('dragover'));
+  storiesZone.addEventListener('drop', e => {
+    e.preventDefault();
+    storiesZone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) {
+      const input = document.getElementById('stories-csv-input');
+      const dt = new DataTransfer();
+      dt.items.add(e.dataTransfer.files[0]);
+      input.files = dt.files;
+      importStoriesCSV(input);
+    }
+  });
+}
+
+// ---- CSV Template Downloads ----
+function downloadCSVTemplate(type) {
+  const templates = {
+    stories: `id,role,want,so,priority,points,criteria
+US-001,registered user,view my monthly sales dashboard,I can track performance at a glance,high,5,"Given I am logged in, When I click Dashboard, Then I see monthly sales data"
+US-002,admin,export reports to PDF,I can share data with stakeholders,med,3,"Given I am on any report, When I click Export, Then a PDF downloads"
+US-003,manager,filter data by region,I can compare performance across regions,high,8,"Given I am viewing the dashboard, When I select a region filter, Then data updates"`,
+
+    kpis: `name,current,target,change,trend,category,color,progress
+Revenue Growth,$1.2M,$1.5M,+12%,up,Financial,green,80
+Customer Satisfaction,87%,90%,+3%,up,Customer,blue,97
+Process Efficiency,72%,85%,-2%,down,Process,gold,85
+Employee Retention,91%,95%,+1%,up,People,green,96
+Cost Reduction,$45K,$60K,+8%,up,Financial,green,75`,
+
+    stakeholders: `name,role,influence,interest,strategy
+Sarah Johnson,CFO,5,4,Manage closely — weekly updates and financial impact briefings
+Mike Chen,Product Manager,4,5,Manage closely — daily standup and requirements reviews
+Lisa Park,End User,2,5,Keep informed — monthly demos and user feedback sessions
+Tom Wilson,IT Director,4,2,Keep satisfied — technical briefings and milestone updates
+Anna Brown,HR Manager,2,3,Keep informed — quarterly updates on people impacts`,
+  };
+
+  const csv = templates[type] || '';
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ba_${type}_template.csv`;
+  a.click();
+  showToast(`⬇️ ${type} CSV template downloaded!`);
+}
+
+// ---- Parse CSV helper ----
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    // Handle quoted fields with commas
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQuotes = !inQuotes; }
+      else if (line[i] === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+      else { current += line[i]; }
+    }
+    values.push(current.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (values[i] || '').replace(/^"|"$/g, ''); });
+    return obj;
+  });
+}
+
+// ---- Import Stories CSV ----
+function importStoriesCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      let added = 0;
+      rows.forEach(row => {
+        if (!row.role && !row.want) return;
+        state.stories.push({
+          id: row.id || `US-${String(state.stories.length+1).padStart(3,'0')}`,
+          role: row.role || '',
+          want: row.want || '',
+          so: row.so || '',
+          priority: ['high','med','low'].includes(row.priority) ? row.priority : 'med',
+          points: row.points || '3',
+          criteria: row.criteria || '',
+          date: new Date().toLocaleDateString()
+        });
+        added++;
+      });
+      save('stories', state.stories);
+      renderStories();
+      const zone = document.getElementById('stories-upload-zone');
+      zone.classList.add('uploaded');
+      zone.querySelector('.uz-title').textContent = `✅ ${file.name} — ${added} stories imported!`;
+      showToast(`✅ ${added} user stories imported!`);
+    } catch(err) {
+      showToast('❌ Could not parse CSV. Please check the format.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ---- Import KPIs CSV ----
+function importKPICSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      let added = 0;
+      rows.forEach(row => {
+        if (!row.name) return;
+        state.kpis.push({
+          name: row.name,
+          current: row.current || '',
+          target: row.target || '',
+          change: row.change || '',
+          trend: ['up','down','flat'].includes(row.trend) ? row.trend : 'flat',
+          category: row.category || 'General',
+          color: ['green','blue','gold','red'].includes(row.color) ? row.color : 'green',
+          progress: parseInt(row.progress) || 0,
+        });
+        added++;
+      });
+      save('kpis', state.kpis);
+      renderKPIs();
+      showToast(`✅ ${added} KPIs imported!`);
+    } catch(err) {
+      showToast('❌ Could not parse CSV. Please check the format.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ---- Import Stakeholders CSV ----
+function importStakeholdersCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+      let added = 0;
+      rows.forEach(row => {
+        if (!row.name) return;
+        state.stakeholders.push({
+          name: row.name,
+          role: row.role || '',
+          influence: parseInt(row.influence) || 3,
+          interest: parseInt(row.interest) || 3,
+          strategy: row.strategy || '',
+          id: Date.now() + added,
+        });
+        added++;
+      });
+      save('stakeholders', state.stakeholders);
+      renderStakeholders();
+      showToast(`✅ ${added} stakeholders imported!`);
+    } catch(err) {
+      showToast('❌ Could not parse CSV. Please check the format.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ---- Import Meeting Notes TXT ----
+function importMeetingTXT(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    // Auto-detect title, date, attendees from text
+    const titleMatch = text.match(/(?:meeting|title|subject)[:\s]+([^\n]+)/i);
+    const dateMatch = text.match(/(?:date)[:\s]+([^\n]+)/i);
+    const attendeesMatch = text.match(/(?:attendees|participants|present)[:\s]+([^\n]+)/i);
+
+    if (titleMatch) document.getElementById('mtg-title').value = titleMatch[1].trim();
+    if (dateMatch) {
+      const d = new Date(dateMatch[1].trim());
+      if (!isNaN(d)) document.getElementById('mtg-date').value = d.toISOString().split('T')[0];
+    }
+    if (attendeesMatch) document.getElementById('mtg-attendees').value = attendeesMatch[1].trim();
+
+    // Extract action items — look for lines with [ ] or TODO or ACTION
+    const actionLines = text.split('\n').filter(l =>
+      /\[\s*\]|\btodo\b|\baction\b|\bfollow.up\b|\bAI:|\bACTION:/i.test(l)
+    );
+
+    actionLines.forEach(line => {
+      const cleaned = line.replace(/\[\s*\]|TODO:|ACTION:|AI:/gi, '').trim();
+      if (cleaned.length > 3) {
+        state.actions.push({
+          text: cleaned, done: false,
+          owner: '', due: '', id: Date.now() + Math.random()
+        });
+      }
+    });
+
+    // Put rest of text into decisions/agenda
+    document.getElementById('mtg-agenda').value = text.substring(0, 300) + (text.length > 300 ? '...' : '');
+
+    save('actions', state.actions);
+    renderActions();
+    showToast(`✅ Meeting notes imported! ${actionLines.length} action items detected.`);
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ---- Export ALL Data as JSON Backup ----
+function exportAllData() {
+  const backup = {
+    version: '1.0',
+    exported: new Date().toISOString(),
+    stories: state.stories,
+    kpis: state.kpis,
+    processSteps: state.processSteps,
+    stakeholders: state.stakeholders,
+    actions: state.actions,
+    meetings: state.meetings,
+    changes: state.changes,
+    scope: state.scope,
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ba_command_center_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  showToast('✅ Full backup exported!');
+}
+
+// ---- Import ALL Data from JSON Backup ----
+function importAllData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if (!backup.version) { showToast('❌ Invalid backup file!'); return; }
+
+      if (backup.stories) { state.stories = backup.stories; save('stories', state.stories); }
+      if (backup.kpis) { state.kpis = backup.kpis; save('kpis', state.kpis); }
+      if (backup.processSteps) { state.processSteps = backup.processSteps; save('process', state.processSteps); }
+      if (backup.stakeholders) { state.stakeholders = backup.stakeholders; save('stakeholders', state.stakeholders); }
+      if (backup.actions) { state.actions = backup.actions; save('actions', state.actions); }
+      if (backup.meetings) { state.meetings = backup.meetings; save('meetings', state.meetings); }
+      if (backup.changes) { state.changes = backup.changes; save('changes', state.changes); }
+      if (backup.scope) { state.scope = backup.scope; save('scope', state.scope); }
+
+      renderDashboard();
+      showToast('✅ Backup restored successfully!');
+    } catch(err) {
+      showToast('❌ Could not read backup file. Please check format.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ---- Clear All Data ----
+function clearAllData() {
+  ['stories','kpis','process','stakeholders','actions','meetings','changes','scope'].forEach(k => {
+    localStorage.removeItem('ba_' + k);
+  });
+  state = { stories:[], kpis:[], processSteps:[], stakeholders:[], actions:[], meetings:[], changes:[], scope:{} };
+  renderDashboard();
+  showToast('🗑️ All data cleared!');
+}
+
+</script>
+</body>
+</html>
